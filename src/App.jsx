@@ -1,49 +1,41 @@
 import "./App.css";
+import Header from "./components/header";
+import Search from "./components/search";
+import RepoList from "./components/repoList";
+import { useEffect, useState } from "react";
 
 function App() {
+  const [list, setList] = useState([]);
+
+  const [querry, setQuerry] = useState("stars:>10000");
+
+  const [err, setErr] = useState([]);
+
+  useEffect(() => {
+    async function fetchRepo() {
+      return fetch("https://api.github.com/search/repositories?q=" + querry, {
+        header: {
+          Authorization: "Bearer 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",
+        },
+      })
+        .then((res) => res.json())
+        .then((res) => setList(res.items))
+        .catch((err) => setErr(err));
+      console.log(err);
+    }
+    fetchRepo();
+  }, [querry]);
+
+  function setNewQuerry(newQuerry) {
+    setQuerry(newQuerry ? newQuerry : "stars:>10000");
+  }
+
   return (
     <>
-      <header>
-        <div className="content-wrapper">
-          <h1>Welcome to the JSHeroes Bootcamp!</h1>
-        </div>
-        <img className="bear" src="/js-heroes-bear.png" />
-      </header>
-
+      <Header />
       <main>
-        <form className="search-form">
-          <input className="input" />
-          <button className="button">Search</button>
-        </form>
-
-        <ul className="repo-cards">
-          <li className="repo-card">
-            <span className="title">facebook/react</span>
-            <span className="description">placeholder description</span>
-            <section className="footer">
-              <div>Stars: 500</div>
-              <div>Forks: 100</div>
-            </section>
-          </li>
-
-          <li className="repo-card">
-            <span className="title">vuejs/vue</span>
-            <span className="description">placeholder description</span>
-            <section className="footer">
-              <div>Stars: 500</div>
-              <div>Forks: 100</div>
-            </section>
-          </li>
-
-          <li className="repo-card">
-            <span className="title">sveltejs/svelte</span>
-            <span className="description">placeholder description</span>
-            <section className="footer">
-              <div>Stars: 500</div>
-              <div>Forks: 100</div>
-            </section>
-          </li>
-        </ul>
+        <Search setQuerry={setNewQuerry} />
+        {list.length === 0 ? <span>Loading</span> : <RepoList data={list} />}
       </main>
     </>
   );
